@@ -82,7 +82,9 @@ window.App.Grid = (function () {
 
   function switchSheet(index) {
     activeSheetIndex = index;
-    xs.sheet.resetData(xs.datas[index]);
+    try {
+      xs.sheet.resetData(xs.datas[index]);
+    } catch (e) { xs.reRender && xs.reRender(); }
     renderTabs();
   }
 
@@ -123,8 +125,10 @@ window.App.Grid = (function () {
     if (!xs) return;
     xs.loadData(data);
     // Clamp active sheet index in case new data has fewer sheets
-    if (activeSheetIndex >= xs.datas.length) activeSheetIndex = 0;
-    xs.sheet.resetData(xs.datas[activeSheetIndex]);
+    if (!xs.datas || activeSheetIndex >= xs.datas.length) activeSheetIndex = 0;
+    try {
+      xs.sheet.resetData(xs.datas[activeSheetIndex]);
+    } catch (e) { /* sheet reselect failed — x-spreadsheet will default to sheet 0 */ }
     renderTabs();
   }
   function getActiveSheet()    { return activeSheetIndex; }
