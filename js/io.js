@@ -42,6 +42,19 @@ window.App.IO = (function () {
     return Papa.unparse(matrix, { delimiter: delim });
   }
 
+  // Convert ARGB hex string (e.g. 'FF7C3AED') → '#7c3aed', or null if not usable
+  function _argbToHex(argb) {
+    if (!argb || typeof argb !== 'string') return null;
+    const rgb = argb.length === 8 ? argb.slice(2) : argb;
+    if (!/^[0-9a-fA-F]{6}$/.test(rgb)) return null;
+    return '#' + rgb.toLowerCase();
+  }
+
+  // Convert '#7c3aed' → 'FF7C3AED'
+  function _hexToArgb(hex) {
+    return 'FF' + hex.replace('#', '').toUpperCase();
+  }
+
   // Convert x-spreadsheet sheet data → ExcelJS worksheet
   function _sheetToExcelJsWs(workbook, sheetData) {
     const ws   = workbook.addWorksheet(sheetData.name || 'Sheet1');
@@ -56,7 +69,7 @@ window.App.IO = (function () {
         if (!cell || cell.text === undefined) return;
         const wsCell = ws.getCell(ri + 1, ci + 1);
         const text   = cell.text;
-        // Detect formula
+        // Value
         if (typeof text === 'string' && text.startsWith('=')) {
           wsCell.value = { formula: text.slice(1) };
         } else if (!isNaN(text) && text !== '') {
@@ -64,11 +77,18 @@ window.App.IO = (function () {
         } else {
           wsCell.value = text;
         }
-        // Basic formatting
+        // Formatting
         if (cell.style) {
-          if (cell.style.bold)      wsCell.font  = { ...(wsCell.font || {}), bold: true };
-          if (cell.style.italic)    wsCell.font  = { ...(wsCell.font || {}), italic: true };
-          if (cell.style.underline) wsCell.font  = { ...(wsCell.font || {}), underline: true };
+          const s = cell.style;
+          const font = {};
+          if (s.font && s.font.bold)   font.bold   = true;
+          if (s.font && s.font.italic) font.italic = true;
+          if (s.underline)             font.underline = true;
+          if (s.color)                 font.color  = { argb: _hexToArgb(s.color) };
+          if (Object.keys(font).length > 0) wsCell.font = font;
+          if (s.bgcolor) {
+            wsCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: _hexToArgb(s.bgcolor) } };
+          }
         }
       });
     });
@@ -87,12 +107,33 @@ window.App.IO = (function () {
         if (cell.value && typeof cell.value === 'object' && cell.value.formula) {
           text = '=' + cell.value.formula;
         } else if (cell.formula) {
-          // fallback for older ExcelJS versions that expose cell.formula directly
           text = '=' + cell.formula;
         } else if (cell.value !== null && cell.value !== undefined) {
           text = String(cell.value);
         }
-        if (text !== '') cells[ci] = { text };
+
+        // Build style object from ExcelJS formatting
+        const style = {};
+        const font  = {};
+        if (cell.font) {
+          if (cell.font.bold)      font.bold   = true;
+          if (cell.font.italic)    font.italic = true;
+          if (cell.font.underline) style.underline = true;
+          if (cell.font.color) {
+            const c = _argbToHex(cell.font.color.argb);
+            if (c) style.color = c;
+          }
+        }
+        if (Object.keys(font).length > 0) style.font = font;
+        if (cell.fill && cell.fill.type === 'pattern' && cell.fill.fgColor) {
+          const c = _argbToHex(cell.fill.fgColor.argb);
+          if (c) style.bgcolor = c;
+        }
+
+        const hasStyle = Object.keys(style).length > 0;
+        if (text !== '' || hasStyle) {
+          cells[ci] = { text, ...(hasStyle ? { style } : {}) };
+        }
       });
       if (Object.keys(cells).length > 0) rows[ri] = { cells };
     });
