@@ -119,8 +119,13 @@ window.App.Grid = (function () {
 
   function getInstance()       { return xs; }
   function getData()           { return xs ? xs.getData() : []; }
-  function loadData(data)      { if (xs) { xs.loadData(data); renderTabs(); } }
+  function loadData(data) {
+    if (!xs) return;
+    xs.loadData(data);
+    xs.sheet.switchSheet(activeSheetIndex);
+    renderTabs();
+  }
   function getActiveSheet()    { return activeSheetIndex; }
 
-  return { init, getInstance, getData, loadData, getActiveSheet, renderTabs };
+  return { init, getInstance, getData, loadData, getActiveSheet, renderTabs, switchSheet };
 }());

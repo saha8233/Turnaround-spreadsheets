@@ -19,6 +19,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. Wire formula bar → grid
   document.getElementById('formula-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
+      const cellRef = document.getElementById('cell-ref').value;
+      const value   = e.target.value;
+      // Parse cell ref (e.g. "B3") and set the cell value in the grid data
+      const col = cellRef.match(/[A-Z]+/)?.[0] || 'A';
+      const row = parseInt(cellRef.match(/\d+/)?.[0] || '1', 10);
+      const ci  = col.split('').reduce((acc, c) => acc * 26 + c.charCodeAt(0) - 64, 0) - 1;
+      const ri  = row - 1;
+      const data = JSON.parse(JSON.stringify(window.App.Grid.getData()));
+      const si   = window.App.Grid.getActiveSheet();
+      if (!data[si].rows) data[si].rows = {};
+      if (!data[si].rows[ri]) data[si].rows[ri] = { cells: {} };
+      if (!data[si].rows[ri].cells) data[si].rows[ri].cells = {};
+      data[si].rows[ri].cells[ci] = { text: value };
+      window.App.Grid.loadData(data);
+      window.App.Storage.onDataChanged();
       e.target.blur();
     }
   });
@@ -115,6 +130,7 @@ function _handleAction(action) {
       if (confirm('Start a new spreadsheet? Unsaved changes will be lost.')) {
         window.App.Grid.loadData([{ name: 'Sheet1', rows: {} }]);
         localStorage.removeItem('turnaround_spreadsheet_data');
+        localStorage.removeItem('turnaround_attachments');
       }
       break;
 

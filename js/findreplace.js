@@ -103,9 +103,9 @@ window.App.FindReplace = (function () {
   }
 
   function _navigateTo(match) {
-    // Switch sheet if needed
+    // Switch sheet if needed, using public API to keep activeSheetIndex in sync
     if (match.sheetIndex !== window.App.Grid.getActiveSheet()) {
-      window.App.Grid.getInstance().sheet.switchSheet(match.sheetIndex);
+      window.App.Grid.switchSheet(match.sheetIndex);
     }
     // Scroll to cell using x-spreadsheet internal API
     try {
