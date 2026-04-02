@@ -73,7 +73,7 @@ window.App.Storage = (function () {
         window.App.Grid.loadData(data);
         resolve();
       };
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error('Failed to read file'));
       reader.readAsText(file);
     });
   }
@@ -84,7 +84,9 @@ window.App.Storage = (function () {
     const a    = document.createElement('a');
     a.href = url;
     a.download = filename;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
 

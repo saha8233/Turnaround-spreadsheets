@@ -84,7 +84,10 @@ window.App.IO = (function () {
       row.eachCell({ includeEmpty: false }, (cell, colNum) => {
         const ci  = colNum - 1;
         let text  = '';
-        if (cell.formula) {
+        if (cell.value && typeof cell.value === 'object' && cell.value.formula) {
+          text = '=' + cell.value.formula;
+        } else if (cell.formula) {
+          // fallback for older ExcelJS versions that expose cell.formula directly
           text = '=' + cell.formula;
         } else if (cell.value !== null && cell.value !== undefined) {
           text = String(cell.value);
@@ -118,7 +121,7 @@ window.App.IO = (function () {
   async function _importDelimited(file, delimiter) {
     const text = await file.text();
     const rows = _csvToRows(text, delimiter);
-    const current = window.App.Grid.getData();
+    const current = JSON.parse(JSON.stringify(window.App.Grid.getData()));
     current[window.App.Grid.getActiveSheet()].rows = rows;
     window.App.Grid.loadData(current);
     window.App.Storage.onDataChanged();
