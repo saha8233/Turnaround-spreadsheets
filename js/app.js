@@ -156,12 +156,23 @@ function _handleAction(action) {
 
 function _triggerFormatKey(key) {
   const xs = window.App.Grid.getInstance();
-  if (xs) xs.sheet.el.el.focus();
+  if (!xs || !xs.sheet || !xs.sheet.el || !xs.sheet.el.el) return;
+  const el = xs.sheet.el.el;
+  el.focus();
+  el.dispatchEvent(new KeyboardEvent('keydown', {
+    key: key,
+    ctrlKey: true,
+    bubbles: true,
+    cancelable: true,
+  }));
 }
 
 function _setAlign(align) {
   const xs = window.App.Grid.getInstance();
-  try { xs.sheet.selector.setStyle('align', align); xs.reRender(); } catch (e) {}
+  if (!xs) return;
+  try { xs.sheet.selector.setStyle('align', align); xs.reRender(); } catch (e) {
+    console.warn('setAlign failed:', e);
+  }
 }
 
 function _showKeyboardHint(action) {
