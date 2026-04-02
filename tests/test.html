@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tests — Turnaround Spreadsheets</title>
+  <style>
+    body { font-family: monospace; background: #1e1e1e; color: #f0f0f0; padding: 20px; }
+    h1 { color: #9461f5; margin-bottom: 16px; }
+    #test-summary { font-size: 18px; margin: 16px 0; }
+    #test-results { list-style: none; padding: 0; line-height: 2; }
+  </style>
+</head>
+<body>
+  <h1>Test Suite</h1>
+  <div id="test-summary"></div>
+  <ul id="test-results"></ul>
+
+  <!-- Stub out App.Grid so storage.js doesn't fail without the grid -->
+  <script>
+    window.App = {};
+    window.App.Grid = { getData: () => [], loadData: () => {} };
+  </script>
+
+  <script src="../tests/runner.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/io.js"></script>
+
+  <script src="../tests/test-storage.js"></script>
+  <script src="../tests/test-io.js"></script>
+
+  <script> TestRunner.summary(); </script>
+</body>
+</html>
