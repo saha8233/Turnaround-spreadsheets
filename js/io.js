@@ -12,7 +12,7 @@ window.App.IO = (function () {
   function _csvToRows(csvString, delimiter) {
     if (!csvString || !csvString.trim()) return {};
     const delim  = delimiter || ',';
-    const result = PapaParse.parse(csvString, { delimiter: delim, skipEmptyLines: true });
+    const result = Papa.parse(csvString, { delimiter: delim, skipEmptyLines: true });
     const rows   = {};
     result.data.forEach((row, ri) => {
       const cells = {};
@@ -39,7 +39,7 @@ window.App.IO = (function () {
       }
       matrix.push(row);
     }
-    return PapaParse.unparse(matrix, { delimiter: delim });
+    return Papa.unparse(matrix, { delimiter: delim });
   }
 
   // Convert x-spreadsheet sheet data → ExcelJS worksheet

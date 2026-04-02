@@ -82,7 +82,7 @@ window.App.Grid = (function () {
 
   function switchSheet(index) {
     activeSheetIndex = index;
-    xs.sheet.switchSheet(index);
+    xs.sheet.resetData(xs.datas[index]);
     renderTabs();
   }
 
@@ -122,7 +122,7 @@ window.App.Grid = (function () {
   function loadData(data) {
     if (!xs) return;
     xs.loadData(data);
-    xs.sheet.switchSheet(activeSheetIndex);
+    xs.sheet.resetData(xs.datas[activeSheetIndex]);
     renderTabs();
   }
   function getActiveSheet()    { return activeSheetIndex; }
