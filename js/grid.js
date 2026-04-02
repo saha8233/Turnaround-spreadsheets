@@ -122,6 +122,8 @@ window.App.Grid = (function () {
   function loadData(data) {
     if (!xs) return;
     xs.loadData(data);
+    // Clamp active sheet index in case new data has fewer sheets
+    if (activeSheetIndex >= xs.datas.length) activeSheetIndex = 0;
     xs.sheet.resetData(xs.datas[activeSheetIndex]);
     renderTabs();
   }

@@ -115,20 +115,23 @@ window.App.IO = (function () {
         // Build style object from ExcelJS formatting
         const style = {};
         const font  = {};
-        if (cell.font) {
-          if (cell.font.bold)      font.bold   = true;
-          if (cell.font.italic)    font.italic = true;
-          if (cell.font.underline) style.underline = true;
-          if (cell.font.color) {
-            const c = _argbToHex(cell.font.color.argb);
-            if (c) style.color = c;
+        try {
+          if (cell.font) {
+            if (cell.font.bold)      font.bold   = true;
+            if (cell.font.italic)    font.italic = true;
+            if (cell.font.underline) style.underline = true;
+            if (cell.font.color && cell.font.color.argb) {
+              const c = _argbToHex(cell.font.color.argb);
+              if (c) style.color = c;
+            }
           }
-        }
-        if (Object.keys(font).length > 0) style.font = font;
-        if (cell.fill && cell.fill.type === 'pattern' && cell.fill.fgColor) {
-          const c = _argbToHex(cell.fill.fgColor.argb);
-          if (c) style.bgcolor = c;
-        }
+          if (Object.keys(font).length > 0) style.font = font;
+          if (cell.fill && cell.fill.type === 'pattern' &&
+              cell.fill.fgColor && cell.fill.fgColor.argb) {
+            const c = _argbToHex(cell.fill.fgColor.argb);
+            if (c) style.bgcolor = c;
+          }
+        } catch (e) { /* skip malformed style, keep cell value */ }
 
         const hasStyle = Object.keys(style).length > 0;
         if (text !== '' || hasStyle) {
