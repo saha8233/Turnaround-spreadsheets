@@ -498,7 +498,7 @@
 
 .btn-primary {
   background: var(--accent-primary);
-  color: #fff;
+  color: var(--text-inverse);
   border-color: var(--accent-primary);
 }
 
