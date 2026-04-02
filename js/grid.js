@@ -54,6 +54,7 @@ window.App.Grid = (function () {
   }
 
   function renderTabs() {
+    if (!xs) return;
     const data = xs.getData();
     const container = document.getElementById('sheet-tabs');
     container.innerHTML = '';
@@ -88,9 +89,9 @@ window.App.Grid = (function () {
   function addSheet() {
     const data = xs.getData();
     const name = 'Sheet' + (data.length + 1);
-    data.push({ name, rows: {} });
-    xs.loadData(data);
-    switchSheet(data.length - 1);
+    const newData = [...data, { name, rows: {} }];
+    xs.loadData(newData);
+    switchSheet(newData.length - 1);
     if (window.App.Storage) window.App.Storage.onDataChanged();
   }
 
@@ -118,7 +119,7 @@ window.App.Grid = (function () {
 
   function getInstance()       { return xs; }
   function getData()           { return xs ? xs.getData() : []; }
-  function loadData(data)      { xs.loadData(data); renderTabs(); }
+  function loadData(data)      { if (xs) { xs.loadData(data); renderTabs(); } }
   function getActiveSheet()    { return activeSheetIndex; }
 
   return { init, getInstance, getData, loadData, getActiveSheet, renderTabs };
