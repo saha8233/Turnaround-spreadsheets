@@ -1,0 +1,58 @@
+/* css/theme.css — Turnaround Spreadsheets color palette & base reset */
+
+:root {
+  --bg-primary:      #1e1e1e;
+  --bg-secondary:    #2a2a2a;
+  --bg-surface:      #333333;
+  --bg-hover:        #3d3d3d;
+  --accent-primary:  #7c3aed;
+  --accent-hover:    #9461f5;
+  --accent-muted:    #4c1d95;
+  --accent-subtle:   rgba(124, 58, 237, 0.15);
+  --text-primary:    #f0f0f0;
+  --text-secondary:  #a0a0a0;
+  --text-disabled:   #555555;
+  --border-color:    #444444;
+  --border-accent:   #7c3aed;
+  --grid-line:       #3a3a3a;
+  --danger:          #e53e3e;
+  --danger-hover:    #fc8181;
+  --success:         #38a169;
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.6);
+  --transition: 0.15s ease;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+input, select {
+  font-family: inherit;
+  font-size: 13px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+}
