@@ -23,13 +23,13 @@ window.App.Grid = (function () {
       row:  { len: 200, height: 25 },
       col:  { len: 26, width: 100, indexWidth: 60, minWidth: 60 },
       style: {
-        bgcolor: '#1e1e1e',
+        bgcolor: '#ffffff',
         align:   'left',
         valign:  'middle',
         textwrap: false,
         strike:   false,
         underline: false,
-        color:    '#f0f0f0',
+        color:    '#1e1e1e',
         font: { name: 'Arial', size: 10, bold: false, italic: false },
       },
     });

@@ -172,16 +172,16 @@
   overflow: hidden;
 }
 
-/* Override x-spreadsheet default styles to match our theme */
+/* Grid area is light mode; chrome (toolbar, tabs, panels) stays dark */
 .x-spreadsheet {
-  background: var(--bg-primary) !important;
+  background: #ffffff !important;
   border-color: var(--border-color) !important;
 }
 
 .x-spreadsheet-toolbar { display: none !important; }
 
 .x-spreadsheet-sheet {
-  background: var(--bg-primary) !important;
+  background: #ffffff !important;
 }
 
 /* ── Sheet Tabs ─────────────────────────────────────────── */
