@@ -55,10 +55,22 @@ window.App.IO = (function () {
     return 'FF' + hex.replace('#', '').toUpperCase();
   }
 
+  // Find or insert a style in the styles array, return its index
+  function _getOrAddStyle(styles, styleObj) {
+    const key = JSON.stringify(styleObj);
+    for (let i = 0; i < styles.length; i++) {
+      if (JSON.stringify(styles[i]) === key) return i;
+    }
+    styles.push(styleObj);
+    return styles.length - 1;
+  }
+
   // Convert x-spreadsheet sheet data → ExcelJS worksheet
+  // cell.style is an index into sheetData.styles[]
   function _sheetToExcelJsWs(workbook, sheetData) {
-    const ws   = workbook.addWorksheet(sheetData.name || 'Sheet1');
-    const rows = sheetData.rows || {};
+    const ws     = workbook.addWorksheet(sheetData.name || 'Sheet1');
+    const rows   = sheetData.rows   || {};
+    const styles = sheetData.styles || [];
     const rowNums = Object.keys(rows).map(Number).sort((a, b) => a - b);
     rowNums.forEach(ri => {
       const rowData = rows[ri];
@@ -77,14 +89,14 @@ window.App.IO = (function () {
         } else {
           wsCell.value = text;
         }
-        // Formatting
-        if (cell.style) {
-          const s = cell.style;
+        // Look up style by index
+        const s = (typeof cell.style === 'number') ? styles[cell.style] : null;
+        if (s) {
           const font = {};
-          if (s.font && s.font.bold)   font.bold   = true;
-          if (s.font && s.font.italic) font.italic = true;
+          if (s.font && s.font.bold)   font.bold      = true;
+          if (s.font && s.font.italic) font.italic    = true;
           if (s.underline)             font.underline = true;
-          if (s.color)                 font.color  = { argb: _hexToArgb(s.color) };
+          if (s.color)                 font.color     = { argb: _hexToArgb(s.color) };
           if (Object.keys(font).length > 0) wsCell.font = font;
           if (s.bgcolor) {
             wsCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: _hexToArgb(s.bgcolor) } };
@@ -95,10 +107,13 @@ window.App.IO = (function () {
     return ws;
   }
 
-  // Convert ExcelJS worksheet → x-spreadsheet rows object
+  // Convert ExcelJS worksheet → x-spreadsheet { rows, styles }
+  // Returns styles as an array; cells reference styles by index (x-spreadsheet format)
   function _excelJsWsToRows(ws) {
-    const rows = {};
+    const rows   = {};
+    const styles = [];
     ws.eachRow({ includeEmpty: false }, (row, rowNum) => {
+      if (!row || typeof row.eachCell !== 'function') return;
       const ri    = rowNum - 1;
       const cells = {};
       row.eachCell({ includeEmpty: false }, (cell, colNum) => {
@@ -113,34 +128,36 @@ window.App.IO = (function () {
         }
 
         // Build style object from ExcelJS formatting
-        const style = {};
-        const font  = {};
+        const styleObj = {};
         try {
+          const font = {};
           if (cell.font) {
             if (cell.font.bold)      font.bold   = true;
             if (cell.font.italic)    font.italic = true;
-            if (cell.font.underline) style.underline = true;
+            if (cell.font.underline) styleObj.underline = true;
             if (cell.font.color && cell.font.color.argb) {
               const c = _argbToHex(cell.font.color.argb);
-              if (c) style.color = c;
+              if (c) styleObj.color = c;
             }
           }
-          if (Object.keys(font).length > 0) style.font = font;
+          if (Object.keys(font).length > 0) styleObj.font = font;
           if (cell.fill && cell.fill.type === 'pattern' &&
               cell.fill.fgColor && cell.fill.fgColor.argb) {
             const c = _argbToHex(cell.fill.fgColor.argb);
-            if (c) style.bgcolor = c;
+            if (c) styleObj.bgcolor = c;
           }
         } catch (e) { /* skip malformed style, keep cell value */ }
 
-        const hasStyle = Object.keys(style).length > 0;
+        const hasStyle = Object.keys(styleObj).length > 0;
         if (text !== '' || hasStyle) {
-          cells[ci] = { text, ...(hasStyle ? { style } : {}) };
+          const cellData = { text };
+          if (hasStyle) cellData.style = _getOrAddStyle(styles, styleObj);
+          cells[ci] = cellData;
         }
       });
       if (Object.keys(cells).length > 0) rows[ri] = { cells };
     });
-    return rows;
+    return { rows, styles };
   }
 
   // ── Public import functions ────────────────────────────────
@@ -177,7 +194,8 @@ window.App.IO = (function () {
     await workbook.xlsx.load(buffer);
     const sheets = [];
     workbook.eachSheet(ws => {
-      sheets.push({ name: ws.name, rows: _excelJsWsToRows(ws) });
+      const { rows, styles } = _excelJsWsToRows(ws);
+      sheets.push({ name: ws.name, styles, rows });
     });
     if (sheets.length === 0) throw new Error('No sheets found in file');
     window.App.Grid.loadData(sheets);
