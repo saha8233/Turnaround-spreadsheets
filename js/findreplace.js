@@ -131,7 +131,6 @@ window.App.FindReplace = (function () {
       window.App.Grid.loadData(data);
       window.App.Storage.onDataChanged();
     }
-    _search();
     findNext();
   }
 

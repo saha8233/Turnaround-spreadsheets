@@ -13,10 +13,12 @@ window.App.Attachments = (function () {
 
     // Update panel when cell is selected
     const xs = window.App.Grid.getInstance();
-    xs.on('cell-selected', (_cell, ri, _ci) => {
-      _render(ri);
-      _updateRowLabel(ri);
-    });
+    if (xs) {
+      xs.on('cell-selected', (_cell, ri, _ci) => {
+        _render(ri);
+        _updateRowLabel(ri);
+      });
+    }
   }
 
   function toggle() {
@@ -54,10 +56,18 @@ window.App.Attachments = (function () {
     attachments.forEach(att => {
       const chip = document.createElement('div');
       chip.className = 'attachment-chip';
-      chip.innerHTML = `
-        <span class="file-icon">${_fileIcon(att.name)}</span>
-        <span class="file-name" title="${att.name}">${att.name}</span>
-      `;
+
+      const icon = document.createElement('span');
+      icon.className = 'file-icon';
+      icon.textContent = _fileIcon(att.name);
+
+      const name = document.createElement('span');
+      name.className = 'file-name';
+      name.setAttribute('title', att.name);
+      name.textContent = att.name;
+
+      chip.appendChild(icon);
+      chip.appendChild(name);
       list.appendChild(chip);
     });
   }
