@@ -6,6 +6,7 @@
   <title>Turnaround Spreadsheets</title>
   <link rel="stylesheet" href="lib/xspreadsheet.css" />
   <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/captainslog.css" />
   <link rel="stylesheet" href="css/spreadsheet.css" />
 </head>
 <body>
@@ -64,6 +65,8 @@
 
     <div class="toolbar-separator"></div>
     <button class="toolbar-btn" id="btn-find-replace">Find & Replace</button>
+    <div class="toolbar-separator"></div>
+    <button class="toolbar-btn" id="btn-log-toggle">📋 Log ▶</button>
   </div>
 
   <!-- Formula Bar -->
@@ -89,6 +92,24 @@
       </div>
       <div class="panel-footer">
         <button class="btn-attach" disabled>+ Attach File</button>
+      </div>
+    </div>
+
+    <!-- Captain's Log Panel (slides in from right) -->
+    <div id="log-panel">
+      <div class="log-panel-header">
+        <span class="log-panel-title">Captain's Log</span>
+        <span class="log-shift-badge" id="log-shift-badge">☀ Day</span>
+      </div>
+      <div class="log-day-tabs" id="log-day-tabs"></div>
+      <div class="log-entries" id="log-entries"></div>
+      <div class="log-compose" id="log-compose">
+        <div class="log-compose-row">
+          <span class="log-time-badge day" id="log-time-badge">00:00</span>
+          <input class="log-initials-input" id="log-initials" maxlength="3" placeholder="NH" />
+          <input class="log-note-input" id="log-note" placeholder="Add a note…" />
+          <button class="log-add-btn" id="log-add-btn">Add</button>
+        </div>
       </div>
     </div>
   </div>
@@ -164,6 +185,7 @@
 <!-- App modules (order matters) -->
 <script src="js/grid.js"></script>
 <script src="js/storage.js"></script>
+<script src="js/captainslog.js"></script>
 <script src="js/io.js"></script>
 <script src="js/findreplace.js"></script>
 <script src="js/attachments.js"></script>
