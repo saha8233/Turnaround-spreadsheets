@@ -50,6 +50,8 @@
   (function () {
     const CL       = window.App.CaptainsLog;
     let _activeDay = null;   // null = today
+    let _wired     = false;
+    let _clockTimer = null;
 
     function _updateShiftBadge() {
       const badge = document.getElementById('sa-shift-badge');
@@ -60,7 +62,8 @@
     }
 
     function _todayLabel() {
-      return CL._formatDateLabel(CL._todayKey()) + ', ' + new Date().getFullYear();
+      const key = CL._todayKey();
+      return CL._formatDateLabel(key) + ', ' + key.slice(0, 4);
     }
 
     function _renderSidebar() {
@@ -79,9 +82,13 @@
         const count    = (data[key] || []).length;
         const tab      = document.createElement('div');
         tab.className  = 'log-sidebar-tab' + (isActive ? ' active' : '');
-        tab.innerHTML  =
-          '<div>' + CL._formatDateLabel(key) + (isToday ? ' ★' : '') + '</div>' +
-          '<div class="log-sidebar-tab-count">' + count + (count === 1 ? ' entry' : ' entries') + '</div>';
+        const labelDiv = document.createElement('div');
+        labelDiv.textContent = CL._formatDateLabel(key) + (isToday ? ' ★' : '');
+        const countDiv = document.createElement('div');
+        countDiv.className   = 'log-sidebar-tab-count';
+        countDiv.textContent = count + (count === 1 ? ' entry' : ' entries');
+        tab.appendChild(labelDiv);
+        tab.appendChild(countDiv);
         tab.addEventListener('click', function () {
           _activeDay = isToday ? null : key;
           _renderSidebar();
@@ -151,8 +158,11 @@
       const noteEl  = document.getElementById('sa-note');
 
       if (viewKey !== today) {
-        compose.innerHTML = '<div class="log-readonly-notice">Viewing ' +
-          CL._formatDateLabel(viewKey) + ' — entries are read-only</div>';
+        const notice = document.createElement('div');
+        notice.className   = 'log-readonly-notice';
+        notice.textContent = 'Viewing ' + CL._formatDateLabel(viewKey) + ' — entries are read-only';
+        compose.innerHTML  = '';
+        compose.appendChild(notice);
       } else {
         if (!noteEl) {
           compose.innerHTML =
@@ -163,6 +173,7 @@
             '<button class="log-add-btn" id="sa-add-btn">Add</button>' +
             '</div>' +
             '<div class="log-standalone-hint">Press Enter to submit · Time auto-updates · Shift colour applied automatically</div>';
+          _wired = false;   // DOM rebuilt — reset wire flag before re-wiring
           _wireCompose();
         }
         _updateTimeBadge();
@@ -178,6 +189,8 @@
     }
 
     function _wireCompose() {
+      if (_wired) return;
+      _wired = true;
       const noteInput = document.getElementById('sa-note');
       const addBtn    = document.getElementById('sa-add-btn');
       if (!noteInput || !addBtn) return;
@@ -210,7 +223,7 @@
     _updateComposeArea();
     // Wire compose row — pre-rendered in static HTML above, same pattern as captainslog.js init()
     _wireCompose();
-    setInterval(function () { _updateTimeBadge(); _updateShiftBadge(); }, 60000);
+    _clockTimer = setInterval(function () { _updateTimeBadge(); _updateShiftBadge(); }, 60000);
     const initEl = document.getElementById('sa-initials');
     if (initEl) initEl.focus();
 
