@@ -14,7 +14,11 @@ window.App.CaptainsLog = (function () {
   // ── Pure functions (testable) ──────────────────────────────
 
   function _todayKey() {
-    return new Date().toISOString().slice(0, 10); // "2026-04-21"
+    const d = new Date();
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const da = String(d.getDate()).padStart(2, '0');
+    return y + '-' + mo + '-' + da;
   }
 
   function _getShift() {
@@ -204,6 +208,7 @@ window.App.CaptainsLog = (function () {
   }
 
   function _startClock() {
+    if (_clockTimer) return;  // guard against double-init
     _updateTimeBadge();
     _clockTimer = setInterval(function () {
       _updateTimeBadge();
@@ -283,6 +288,9 @@ window.App.CaptainsLog = (function () {
     _renderDayTabs();
     _renderEntries();
     _updateComposeArea();
+    // Wire the compose row that is pre-rendered in index.html static markup.
+    // _updateComposeArea only wires when it rebuilds the DOM (after past-day view);
+    // on first load #log-note already exists so we wire here explicitly.
     _wireComposeRow();
     _startClock();
 
