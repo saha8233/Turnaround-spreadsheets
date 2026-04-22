@@ -13,11 +13,18 @@
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform 0.2s ease;
+  visibility: hidden;
+  /* visibility hides on load; 0.2s delay on close lets the slide-out finish first */
+  transition: transform 0.2s ease, visibility 0s linear 0.2s;
   z-index: 99;
 }
 
-#log-panel.open { transform: translateX(0); }
+#log-panel.open {
+  transform: translateX(0);
+  visibility: visible;
+  /* no delay on open — visible immediately as it slides in */
+  transition: transform 0.2s ease, visibility 0s linear 0s;
+}
 
 /* Header */
 .log-panel-header {
