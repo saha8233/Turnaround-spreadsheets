@@ -165,6 +165,7 @@
         compose.appendChild(notice);
       } else {
         if (!noteEl) {
+          _wired = false;   // reset before rebuilding DOM so _wireCompose can run again
           compose.innerHTML =
             '<div class="log-standalone-compose-row">' +
             '<span class="log-time-badge day" id="sa-time-badge">00:00</span>' +
@@ -173,7 +174,6 @@
             '<button class="log-add-btn" id="sa-add-btn">Add</button>' +
             '</div>' +
             '<div class="log-standalone-hint">Press Enter to submit · Time auto-updates · Shift colour applied automatically</div>';
-          _wired = false;   // DOM rebuilt — reset wire flag before re-wiring
           _wireCompose();
         }
         _updateTimeBadge();
