@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Captain's Log — Turnaround Spreadsheets</title>
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/captainslog.css" />
+</head>
+<body>
+<div class="log-standalone-page">
+
+  <!-- Top bar -->
+  <div class="log-topbar">
+    <a class="log-back-link" href="index.html">← Back to Spreadsheet</a>
+    <div class="log-topbar-sep"></div>
+    <span class="log-topbar-title">Captain's Log</span>
+    <span class="log-shift-badge day log-topbar-shift" id="sa-shift-badge">☀ Day</span>
+  </div>
+
+  <!-- Body -->
+  <div class="log-standalone-body">
+
+    <!-- Sidebar: vertical day list -->
+    <div class="log-sidebar" id="sa-sidebar">
+      <div class="log-sidebar-label">Days</div>
+    </div>
+
+    <!-- Main area -->
+    <div class="log-standalone-main">
+      <div class="log-standalone-entries" id="sa-entries"></div>
+      <div class="log-standalone-compose" id="sa-compose">
+        <div class="log-standalone-compose-row">
+          <span class="log-time-badge day" id="sa-time-badge">00:00</span>
+          <input class="log-initials-input" id="sa-initials" maxlength="3" placeholder="NH" />
+          <input class="log-note-input" id="sa-note" placeholder="Add a note and press Enter…" style="flex:1" />
+          <button class="log-add-btn" id="sa-add-btn">Add</button>
+        </div>
+        <div class="log-standalone-hint">Press Enter to submit · Time auto-updates · Shift colour applied automatically</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/captainslog.js"></script>
+<script>
+  // Standalone page init — uses same _store and pure functions,
+  // but drives its own DOM elements (sa-* prefix)
+  (function () {
+    const CL       = window.App.CaptainsLog;
+    let _activeDay = null;   // null = today
+
+    function _updateShiftBadge() {
+      const badge = document.getElementById('sa-shift-badge');
+      if (!badge) return;
+      const shift      = CL._getShift();
+      badge.textContent = shift === 'day' ? '☀ Day shift — ' + _todayLabel() : '🌙 Night shift — ' + _todayLabel();
+      badge.className   = 'log-shift-badge ' + shift + ' log-topbar-shift';
+    }
+
+    function _todayLabel() {
+      return CL._formatDateLabel(CL._todayKey()) + ', ' + new Date().getFullYear();
+    }
+
+    function _renderSidebar() {
+      const sidebar = document.getElementById('sa-sidebar');
+      if (!sidebar) return;
+      const data  = CL._store.getAll();
+      const today = CL._todayKey();
+      const days  = Object.keys(data).sort();
+      if (days.indexOf(today) === -1) days.push(today);
+
+      // Keep the label, rebuild tabs
+      sidebar.innerHTML = '<div class="log-sidebar-label">Days</div>';
+      days.forEach(function (key) {
+        const isToday  = key === today;
+        const isActive = (_activeDay === null && isToday) || _activeDay === key;
+        const count    = (data[key] || []).length;
+        const tab      = document.createElement('div');
+        tab.className  = 'log-sidebar-tab' + (isActive ? ' active' : '');
+        tab.innerHTML  =
+          '<div>' + CL._formatDateLabel(key) + (isToday ? ' ★' : '') + '</div>' +
+          '<div class="log-sidebar-tab-count">' + count + (count === 1 ? ' entry' : ' entries') + '</div>';
+        tab.addEventListener('click', function () {
+          _activeDay = isToday ? null : key;
+          _renderSidebar();
+          _renderEntries();
+          _updateComposeArea();
+        });
+        sidebar.appendChild(tab);
+      });
+    }
+
+    function _renderEntries() {
+      const container = document.getElementById('sa-entries');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const data    = CL._store.getAll();
+      const today   = CL._todayKey();
+      const viewKey = _activeDay || today;
+      const isToday = viewKey === today;
+
+      if (isToday) {
+        const carryKey = CL._store.getCarryOverKey();
+        if (carryKey) {
+          const label       = document.createElement('div');
+          label.className   = 'log-standalone-carry-label';
+          label.textContent = 'Carried from ' + CL._formatDateLabel(carryKey);
+          container.appendChild(label);
+          (data[carryKey] || []).forEach(function (e) { container.appendChild(_makeEl(e, true)); });
+        }
+      }
+
+      (data[viewKey] || []).forEach(function (e) { container.appendChild(_makeEl(e, false)); });
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function _makeEl(entry, faded) {
+      const icon = entry.shift === 'day' ? '☀' : '🌙';
+      const row  = document.createElement('div');
+      row.className = 'log-standalone-entry' + (faded ? ' faded' : '');
+
+      const stripe = document.createElement('div');
+      stripe.className = 'log-standalone-stripe ' + entry.shift;
+
+      const inner = document.createElement('div');
+      inner.className = 'log-standalone-entry-inner';
+
+      const meta = document.createElement('div');
+      meta.className   = 'log-standalone-entry-meta ' + entry.shift;
+      meta.textContent = icon + ' ' + entry.time + '  ·  ' + entry.initials;
+
+      const text = document.createElement('div');
+      text.className   = 'log-standalone-entry-text';
+      text.textContent = entry.text;
+
+      inner.appendChild(meta);
+      inner.appendChild(text);
+      row.appendChild(stripe);
+      row.appendChild(inner);
+      return row;
+    }
+
+    function _updateComposeArea() {
+      const compose = document.getElementById('sa-compose');
+      if (!compose) return;
+      const today   = CL._todayKey();
+      const viewKey = _activeDay || today;
+      const noteEl  = document.getElementById('sa-note');
+
+      if (viewKey !== today) {
+        compose.innerHTML = '<div class="log-readonly-notice">Viewing ' +
+          CL._formatDateLabel(viewKey) + ' — entries are read-only</div>';
+      } else {
+        if (!noteEl) {
+          compose.innerHTML =
+            '<div class="log-standalone-compose-row">' +
+            '<span class="log-time-badge day" id="sa-time-badge">00:00</span>' +
+            '<input class="log-initials-input" id="sa-initials" maxlength="3" placeholder="NH" />' +
+            '<input class="log-note-input" id="sa-note" placeholder="Add a note and press Enter…" style="flex:1" />' +
+            '<button class="log-add-btn" id="sa-add-btn">Add</button>' +
+            '</div>' +
+            '<div class="log-standalone-hint">Press Enter to submit · Time auto-updates · Shift colour applied automatically</div>';
+          _wireCompose();
+        }
+        _updateTimeBadge();
+      }
+    }
+
+    function _updateTimeBadge() {
+      const badge = document.getElementById('sa-time-badge');
+      if (!badge) return;
+      const shift      = CL._getShift();
+      badge.textContent = CL._formatTime(new Date());
+      badge.className   = 'log-time-badge ' + shift;
+    }
+
+    function _wireCompose() {
+      const noteInput = document.getElementById('sa-note');
+      const addBtn    = document.getElementById('sa-add-btn');
+      if (!noteInput || !addBtn) return;
+
+      function _submit() {
+        const initials = (document.getElementById('sa-initials').value || '').trim().toUpperCase();
+        const text     = noteInput.value.trim();
+        if (!text) return;
+        CL._store.addEntry({
+          time:     CL._formatTime(new Date()),
+          initials: initials || '??',
+          text:     text,
+          shift:    CL._getShift(),
+        });
+        noteInput.value = '';
+        _renderSidebar();
+        _renderEntries();
+      }
+
+      noteInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); _submit(); }
+      });
+      addBtn.addEventListener('click', _submit);
+    }
+
+    // Boot
+    _updateShiftBadge();
+    _renderSidebar();
+    _renderEntries();
+    _updateComposeArea();
+    // Wire compose row — pre-rendered in static HTML above, same pattern as captainslog.js init()
+    _wireCompose();
+    setInterval(function () { _updateTimeBadge(); _updateShiftBadge(); }, 60000);
+    const initEl = document.getElementById('sa-initials');
+    if (initEl) initEl.focus();
+
+  }());
+</script>
+</body>
+</html>
