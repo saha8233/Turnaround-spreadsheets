@@ -263,6 +263,8 @@ window.App.CaptainsLog = (function () {
     const panel = document.getElementById('log-panel');
     const btn   = document.getElementById('btn-log-toggle');
     if (!panel) return;
+    // Close attachments panel if open — both panels share the same right-side slot
+    if (window.App.Attachments) window.App.Attachments.close();
     panel.classList.add('open');
     if (btn) { btn.textContent = '📋 Log ◀'; btn.classList.add('active'); }
     _activeDay = null;
