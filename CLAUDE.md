@@ -26,10 +26,15 @@ All modules attach to `window.App` as IIFEs. Load order in `index.html` matters:
 - `css/captainslog.css` — Captain's Log panel + standalone page styles
 
 ### Third-party libs (in `lib/`)
+All MIT licensed — compatible with commercial sale, but copyright notices in each file must be preserved on distribution.
 - `xspreadsheet.js` — grid rendering engine
 - `exceljs.min.js` — xlsx import/export
 - `papaparse.min.js` — CSV parsing
 - `jspdf.umd.min.js` + `jspdf.plugin.autotable.min.js` — PDF export
+
+### Licensing (TODO before sale)
+- All third-party libs are MIT — commercial use permitted, attribution required (notices already in `lib/` files)
+- Custom code is proprietary — a `LICENSE` file declaring copyright ownership still needs to be added before selling
 
 ### localStorage keys
 - `turnaround_spreadsheet_data` — sheet data (JSON array of sheet objects)
