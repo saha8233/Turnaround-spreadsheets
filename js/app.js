@@ -13,10 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. Wire find & replace
   window.App.FindReplace.init();
 
-  // 4. Wire attachments
-  window.App.Attachments.init();
+  // 4. Wire attachments (disabled — panel commented out in index.html)
+  // window.App.Attachments.init();
 
-  // 5. Wire formula bar → grid
+  // 5. Wire Captain's Log
+  if (window.App.CaptainsLog) window.App.CaptainsLog.init();
+
+  // 6. Wire formula bar → grid
   document.getElementById('formula-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       const cellRef = document.getElementById('cell-ref').value;
@@ -38,13 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 6. Wire toolbar dropdowns
+  // 7. Wire toolbar dropdowns
   _initDropdowns();
 
-  // 7. Wire toolbar actions
+  // 8. Wire toolbar actions
   _initActions();
 
-  // 8. Wire keyboard shortcuts
+  // 9. Wire keyboard shortcuts
   _initShortcuts();
 
 });

@@ -25,6 +25,8 @@ window.App.Attachments = (function () {
     const panel  = document.getElementById('attachments-panel');
     const btn    = document.getElementById('attachments-toggle');
     const isOpen = panel.classList.contains('open');
+    // Close log panel if opening attachments — both share the same right-side slot
+    if (!isOpen && window.App.CaptainsLog) window.App.CaptainsLog.close();
     panel.classList.toggle('open', !isOpen);
     btn.classList.toggle('open', !isOpen);
     btn.textContent = isOpen ? 'Attachments ▶' : 'Attachments ◀';
