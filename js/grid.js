@@ -16,6 +16,7 @@ window.App.Grid = (function () {
       showToolbar: false,
       showGrid: true,
       showContextmenu: true,
+      showBottomBar: false,
       view: {
         height: () => document.getElementById('grid-container').clientHeight,
         width:  () => document.getElementById('grid-container').clientWidth,
