@@ -8,7 +8,8 @@ Open `index.html` directly in a browser — no server required.
 
 ### Module pattern
 All modules attach to `window.App` as IIFEs. Load order in `index.html` matters:
-`grid.js` → `storage.js` → `captainslog.js` → `io.js` → `findreplace.js` → `attachments.js` → `app.js`
+`grid.js` → `storage.js` → `captainslog.js` → `io.js` → `findreplace.js` → `app.js`
+(`attachments.js` is commented out — re-enable when needed)
 
 ### Key modules
 | File | Responsibility |
@@ -61,15 +62,32 @@ Tests live in `tests/`. Open `tests/test.html` in a browser to run.
 - **Never push directly to main** — always ask for confirmation first
 - Merge to main via PR or explicit user approval only
 
+## Known Issues / Deferred Work
+- **Attachments panel** — commented out in `index.html` and `app.js`; was conflicting with log panel position. Re-enable and fix positioning when needed.
+- **LICENSE file** — needs to be added before any commercial sale (see Licensing section above)
+- **Task hierarchy feature** — discussed but not started: Crafts → Foremans → Field Coordinator → Planner, with role-based views and checkboxes
+- **Log real-time sync** — currently localStorage only; Firebase planned for a future phase
+- **Log shift time** — hardcoded 06:00–18:00; make configurable in a future iteration
+
 ## Session Notes
 
 ### 2026-04-21
 - First session reviewing the project with Claude
 - Confirmed project structure: vanilla JS, no build step, xspreadsheet-based
 - Added this CLAUDE.md
-- Designed and implemented Captain's Log feature (branch: `feature/captains-log`)
+- Pushed project to GitHub (`saha8233/Turnaround-spreadsheets`), enabled GitHub Pages
+- Designed and implemented Captain's Log feature (branch: `feature/captains-log`, merged to main)
   - Right-side panel in `index.html` (toggleable via toolbar "📋 Log ▶" button)
   - Standalone `log.html` full-page view
   - Shift-aware colour coding: amber day (06:00–17:59), blue night (18:00–05:59)
   - Append-only entries with carry-over from previous day (faded)
   - localStorage-backed with isolated `_store` object (ready for backend swap)
+  - Log panel moved to `position: fixed` outside `#grid-wrapper` to prevent grid layout interference
+
+### 2026-04-22–23
+- Fixed log panel flash on page load (`visibility: hidden` + transition delay)
+- Fixed log panel intruding on grid width (moved from `position: absolute` inside grid-wrapper to `position: fixed`)
+- Commented out attachments panel (was conflicting with log panel — both at same right-side position)
+- Removed duplicate x-spreadsheet native sheet tab bar (`showBottomBar: false` in `grid.js`)
+- Renamed "Captain's Log" to "Log" in UI
+- Noted MIT licensing of all third-party libs; flagged need for proprietary LICENSE file before sale
